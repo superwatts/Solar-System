@@ -15,6 +15,29 @@ char canvas_Name[] = "Solar Sytem";
 const float CENTER_X = canvas_Width / 2.0f;
 const float CENTER_Y = canvas_Height / 2.0f;
 
+// CONTROLS
+constexpr unsigned char MOVE_UP     = 'w';
+constexpr unsigned char MOVE_LEFT   = 'a';
+constexpr unsigned char MOVE_DOWN   = 's';
+constexpr unsigned char MOVE_RIGHT  = 'd';
+
+constexpr unsigned char ZOOM_IN   = 'p';
+constexpr unsigned char ZOOM_OUT  = 'l';
+constexpr unsigned int  TILT_UP   = GLUT_KEY_UP;
+constexpr unsigned int  TILT_DOWN = GLUT_KEY_DOWN;
+
+constexpr unsigned char TOGGLE_DRAW_MODE    = 'm'; // Wireframe vs solid planets
+constexpr unsigned char TOGGLE_NAMES        = 'n';
+constexpr unsigned char TOGGLE_ORBIT_RINGS  = 'o';
+
+constexpr unsigned int  NEXT_PLANET = GLUT_KEY_RIGHT;
+constexpr unsigned int  PREV_PLANET = GLUT_KEY_LEFT;
+
+constexpr unsigned char PRINT_STATS = 'i';
+
+
+// GLOBAL VARIABLES:
+
 const float DEFAULT_POS[3] = {0.0f, 0.0f, 5000.0f};
 float camera_pos[3]     = { DEFAULT_POS[0], DEFAULT_POS[1], DEFAULT_POS[2] };
 float d_camera_pos[3]   = { 0.0f,           0.0f,           0.0f };
@@ -165,7 +188,7 @@ struct Planet
   std::string* moons_names  = NULL;
 
   bool draw_orbit = true;
-  bool draw_name = false;
+  bool draw_name = true;
 
   void calculate_pos()
   {
@@ -722,7 +745,7 @@ static void do_movements(int id)
 
 static void get_keys(unsigned char key, int x, int y)
 {
-  if (std::tolower(key) == 'n')
+  if (std::tolower(key) == TOGGLE_NAMES)
   {
     bool draw = true;
     if (planets[0].draw_name == true) { draw = false; }
@@ -731,7 +754,7 @@ static void get_keys(unsigned char key, int x, int y)
       planets[i].draw_name = draw;
     }
   }
-  if (std::tolower(key) == 'o')
+  if (std::tolower(key) == TOGGLE_ORBIT_RINGS)
   {
     bool draw = false;
     if (planets[0].draw_orbit == false) { draw = true; }
@@ -742,29 +765,29 @@ static void get_keys(unsigned char key, int x, int y)
   }
   float speed = movement_speed;
   if (current_object != 0) { speed = planets[current_object - 1].radius / 2.0f; }
-  if (std::tolower(key) == 'w') { d_camera_pos[1] += speed; }
-  if (std::tolower(key) == 'a') { d_camera_pos[0] -= speed; }
-  if (std::tolower(key) == 's') { d_camera_pos[1] -= speed; }
-  if (std::tolower(key) == 'd') { d_camera_pos[0] += speed; }
+  if (std::tolower(key) == MOVE_UP)     { d_camera_pos[1] += speed; }
+  if (std::tolower(key) == MOVE_LEFT)   { d_camera_pos[0] -= speed; }
+  if (std::tolower(key) == MOVE_DOWN)   { d_camera_pos[1] -= speed; }
+  if (std::tolower(key) == MOVE_RIGHT)  { d_camera_pos[0] += speed; }
 
-  if (std::tolower(key) == 'o')
+  if (std::tolower(key) == ZOOM_IN)
   {
     if (current_object == 0)  { d_camera_pos[2] -= 50; }
     else                      { d_camera_pos[2] -= (planets[current_object-1].radius / 2.0f); }
   }
-  if (std::tolower(key) == 'k')
+  if (std::tolower(key) == ZOOM_OUT)
   {
     if (current_object == 0)  { d_camera_pos[2] += 50; }
     else                      { d_camera_pos[2] += (planets[current_object-1].radius / 2.0f); }
   }
 
-  if (std::tolower(key) == 'm')
+  if (std::tolower(key) == TOGGLE_DRAW_MODE)
   {
     if      (sphere_mode == "WIRE")   { sphere_mode = "SOLID"; }
     else if (sphere_mode == "SOLID")  { sphere_mode = "WIRE"; }
   }
 
-  if (std::tolower(key) == 'i')
+  if (std::tolower(key) == PRINT_STATS)
   {
     std::cout << get_stats_str();
   }
@@ -772,7 +795,7 @@ static void get_keys(unsigned char key, int x, int y)
 
 static void get_special_keys(int key, int x, int y)
 {
-  if (key == GLUT_KEY_DOWN)
+  if (key == TILT_DOWN)
   {
     x_orientation += 0.5;
     while (x_orientation >= 360.0f)
@@ -780,7 +803,7 @@ static void get_special_keys(int key, int x, int y)
       x_orientation -= 360.0f;
     }
   }
-  if (key == GLUT_KEY_UP)
+  if (key == TILT_UP)
   {
     x_orientation -= 0.5;
     while (x_orientation <= -360.0f)
@@ -789,14 +812,14 @@ static void get_special_keys(int key, int x, int y)
     }
   }
   
-  if (key == GLUT_KEY_LEFT)
+  if (key == PREV_PLANET)
   {
     if (current_object == 0) { d_camera_pos[0] = 0.0f; d_camera_pos[1] = 0.0f; d_camera_pos[2] = 0.0f; }
     current_object -= 1;
     if (current_object < 0) { current_object = num_objects - 1; }
     if (current_object == 0) { d_camera_pos[0] = 0.0f; d_camera_pos[1] = 0.0f; d_camera_pos[2] = 0.0f; }
   }
-  if (key == GLUT_KEY_RIGHT)
+  if (key == NEXT_PLANET)
   {
     if (current_object == 0) { d_camera_pos[0] = 0.0f; d_camera_pos[1] = 0.0f; d_camera_pos[2] = 0.0f; }
     current_object += 1;
